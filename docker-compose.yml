@@ -1,0 +1,59 @@
+version: '3'
+services:
+  web:
+    container_name: web_myapp2
+    image: nginx:stable-alpine
+    ports:
+      - 8080:80
+    volumes:
+      - ./src:/var/www/html
+      - ./docker/web/default.conf:/etc/nginx/conf.d/default.conf
+  db:
+    container_name: db_myapp2
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: myapp2_database
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      TZ: Asia/Tokyo
+    ports:
+      - 3306:3306
+    volumes:
+      - mysql_data:/var/lib/mysql
+  php:
+    container_name: php_myapp2
+    build:
+      context: .
+      dockerfile: ./docker/php/Dockerfile    
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: myapp2_database
+      DB_USERNAME: user
+      DB_PASSWORD: password
+      TZ: Asia/Tokyo
+    ports:
+      - 5173:5173
+    volumes:
+      - ./src:/var/www/html
+    depends_on:
+      - db
+    tty: true
+    stdin_open: true
+  phpmyadmin:
+    container_name: phpmyadmin_myapp2
+    image: phpmyadmin/phpmyadmin  
+    environment:
+      PMA_ARBITRARY: 1
+      PMA_HOSTS: db
+    depends_on:
+      - db
+    ports:
+      - 3001:80
+    volumes:
+      - ./phpmyadmin/sessions:/sessions
+volumes:
+  mysql_data:
+    driver: local

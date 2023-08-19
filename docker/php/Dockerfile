@@ -1,4 +1,4 @@
-FROM php:8.0.30-fpm-bullseye
+FROM php:8.2-fpm-bullseye
 
 COPY ./docker/php/php.ini /usr/local/etc/php/php.ini
 
